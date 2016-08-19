@@ -3,14 +3,24 @@
 <head>
   <meta charset="utf-8">
   
-  <title>bug world</title>
+  <title>C语言宏的特殊用法和几个坑 | bug world</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="bug world">
-<meta property="og:url" content="http://antyme.com/index.html">
+  <meta name="description" content="宏特殊用法1. 字符串化(Stringification)在宏体中，如果宏参数前加个#，那么在宏体扩展的时候，宏参数会被扩展成字符串的形式。如：
+ 1234#define WARN_IF(EXP) \do &amp;#123; if (EXP) \	fprintf (stderr, &quot;Warning: &quot; #EXP &quot;\n&quot;); &amp;#125; \while (0)
+WARN_IF (x == 0);会被扩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C语言宏的特殊用法和几个坑">
+<meta property="og:url" content="http://antyme.com/2016/08/18/C语言宏的特殊用法和几个坑/index.html">
 <meta property="og:site_name" content="bug world">
+<meta property="og:description" content="宏特殊用法1. 字符串化(Stringification)在宏体中，如果宏参数前加个#，那么在宏体扩展的时候，宏参数会被扩展成字符串的形式。如：
+ 1234#define WARN_IF(EXP) \do &amp;#123; if (EXP) \	fprintf (stderr, &quot;Warning: &quot; #EXP &quot;\n&quot;); &amp;#125; \while (0)
+WARN_IF (x == 0);会被扩">
+<meta property="og:updated_time" content="2016-08-18T13:24:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="bug world">
+<meta name="twitter:title" content="C语言宏的特殊用法和几个坑">
+<meta name="twitter:description" content="宏特殊用法1. 字符串化(Stringification)在宏体中，如果宏参数前加个#，那么在宏体扩展的时候，宏参数会被扩展成字符串的形式。如：
+ 1234#define WARN_IF(EXP) \do &amp;#123; if (EXP) \	fprintf (stderr, &quot;Warning: &quot; #EXP &quot;\n&quot;); &amp;#125; \while (0)
+WARN_IF (x == 0);会被扩">
   
     <link rel="alternate" href="/atom.xml" title="bug world" type="application/atom+xml">
   
@@ -59,9 +69,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-C语言宏的特殊用法和几个坑" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-C语言宏的特殊用法和几个坑" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/08/18/C语言宏的特殊用法和几个坑/" class="article-date">
   <time datetime="2016-08-18T10:51:22.000Z" itemprop="datePublished">2016-08-18</time>
@@ -74,8 +82,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/18/C语言宏的特殊用法和几个坑/">C语言宏的特殊用法和几个坑</a>
+    <h1 class="article-title" itemprop="name">
+      C语言宏的特殊用法和几个坑
     </h1>
   
 
@@ -106,107 +114,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-git好用容易忘记的命令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/08/18/git好用容易忘记的命令/" class="article-date">
-  <time datetime="2016-08-18T10:30:48.000Z" itemprop="datePublished">2016-08-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/18/git好用容易忘记的命令/">git好用容易忘记的命令</a>
-    </h1>
+    <a href="/2016/08/18/git好用容易忘记的命令/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">git好用容易忘记的命令</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
-<pre><code>删除本地和git跟踪：
-    git rm
-只删除git跟踪，保留本地：
-    git rm --cached 文件名
-</code></pre><p>2、移动文件</p>
-<pre><code>git mv srcName dstName
-相当于
-mv srcName dstName
-git rm srcName
-git add dstName
-</code></pre><p>3、查看日志</p>
-<pre><code>git log
-仅展示简要的增改行数统计
-git log --stat
-使用pretty选项适合自己风格的格式
-git log --pretty=oneline
-git log --pretty=short
-git log --pretty=full
-git log --pretty=fuller
-git log --pretty=format:&quot;%h - %an, %ar : %s&quot;
-
-format参数说明：
-%H 提交对象（commit）的完整哈希字符串
-%h    提交对象的简短哈希字符串
-%T    树对象（tree）的完整哈希字符串
-%t    树对象的简短哈希字符串
-%P    父对象（parent）的完整哈希字符串
-%p    父对象的简短哈希字符串
-%an    作者（author）的名字
-%ae    作者的电子邮件地址
-%ad    作者修订日期（可以用 -date= 选项定制格式）
-%ar    作者修订日期，按多久以前的方式显示
-%cn    提交者（committer）的名字
-%ce    提交者的电子邮箱地址
-%cd    提交日期
-%cr    提交日期，按多久以前的方式显示
-%s    提交说明
-
-git log常用命令选项：
--p                按补丁格式显示每个更新之间的差异
---stat            显示每次更新的文件修改统计信息
---shortstat        只显示--stat中最后的行数修改添加移除统计
---name-only        仅在提交信息后显示已修改的文件清单
---name-status    显示新增、修改、删除的文件清单
---abbrev-commit    仅显示SHA-1的前几个字符，而非所有的40个字符
---relative-date    使用较短的相对时间显示（比如，“2 week ago”）
---graph            显示ASCII图形表示的分支合并历史
---pretty        使用其他格式显示历史提交信息。可用的选项包括oneline、short、full、fuller和format（后跟指定格式）
--n                     仅显示最近的n条提交
---since, --after    仅显示指定时间之后的提交
---until, --before    仅显示指定时间之前的提交
---author            仅显示指定作者相关的提交
---committer            仅显示指定提交者相关的提交
-
-git log --since=2.minutes
-git log --since=2.weeks
-git log --before=&quot;2016-08-17&quot;
-git log --after=&quot;2016-08-16&quot; --before=&quot;2018-08-17&quot;
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://antyme.com/2016/08/18/git好用容易忘记的命令/" data-id="cis06s5g0000031uewciej2ol" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/">git</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
-
-
-  
 
 </section>
         
