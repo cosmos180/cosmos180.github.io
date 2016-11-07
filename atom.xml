@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>bug world</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://antyme.com/"/>
+  <updated>2016-09-25T08:34:38.000Z</updated>
+  <id>http://antyme.com/</id>
+  
+  <author>
+    <name>bug小英雄</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>OpenGL学习与理解</title>
+    <link href="http://antyme.com/2016/09/25/OpenGL%E5%AD%A6%E4%B9%A0%E4%B8%8E%E7%90%86%E8%A7%A3/"/>
+    <id>http://antyme.com/2016/09/25/OpenGL学习与理解/</id>
+    <published>2016-09-25T07:41:11.000Z</published>
+    <updated>2016-09-25T08:34:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，这导致OpenGL的大部分工作都是关于把3D坐标转变为适应你屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大多译为管线，实际上指的是一堆原始图形数据途经一个输送管道，期间经过各种变化处理最终出现在屏幕的过程）管理的。图形渲染管线可以被划分为两个主要部分：第一部分把你的3D坐标转换为2D坐标，第二部分是把2D坐标转变为实际的有颜色的像素。</p>
+<p><img src="/images/pipeline.png" alt=""></p>
+<p>首先，我们以数组的形式传递3个3D坐标作为图形渲染管线的输入，用来表示一个三角形，这个数组叫做顶点数据(Vertex Data)；顶点数据是一系列顶点的集合。一个顶点(Vertex)是一个3D坐标的数据的集合。而顶点数据是用顶点属性(Vertex Attribute)表示的，它可以包含任何我们想用的数据，但是简单起见，我们还是假定每个顶点只由一个3D位置(译注1)和一些颜色值组成的吧。</p>
+<p>图形渲染管线的第一个部分是顶点着色器(Vertex Shader)，它把一个单独的顶点作为输入。顶点着色器主要的目的是把3D坐标转为另一种3D坐标（后面会解释），同时顶点着色器允许我们对顶点属性进行一些基本处理。</p>
+<p>图元装配(Primitive Assembly)阶段将顶点着色器输出的所有顶点作为输入（如果是GL_POINTS，那么就是一个顶点），并所有的点装配成指定图元的形状；本节例子中是一个三角形。</p>
+<p>图元装配阶段的输出会传递给几何着色器(Geometry Shader)。几何着色器把图元形式的一系列顶点的集合作为输入，它可以通过产生新顶点构造出新的（或是其它的）图元来生成其他形状。例子中，它生成了另一个三角形。</p>
+<p>几何着色器的输出会被传入光栅化阶段(Rasterization Stage)，这里它会把图元映射为最终屏幕上相应的像素，生成供片段着色器(Fragment Shader)使用的片段(Fragment)。在片段着色器运行之前会执行裁切(Clipping)。裁切会丢弃超出你的视图以外的所有像素，用来提升执行效率。</p>
+<blockquote>
+<p>OpenGL中的一个片段是OpenGL渲染一个像素所需的所有数据。</p>
+</blockquote>
+<p>片段着色器的主要目的是计算一个像素的最终颜色，这也是所有OpenGL高级效果产生的地方。通常，片段着色器包含3D场景的数据（比如光照、阴影、光的颜色等等），这些数据可以被用来计算最终像素的颜色。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，这导致OpenGL的大部分工作都是关于把3D坐标转变为适应你屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大多译为管线，实际上指的是一
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>C语言宏的特殊用法和几个坑</title>
+    <link href="http://antyme.com/2016/08/18/C%E8%AF%AD%E8%A8%80%E5%AE%8F%E7%9A%84%E7%89%B9%E6%AE%8A%E7%94%A8%E6%B3%95%E5%92%8C%E5%87%A0%E4%B8%AA%E5%9D%91/"/>
+    <id>http://antyme.com/2016/08/18/C语言宏的特殊用法和几个坑/</id>
+    <published>2016-08-18T10:51:22.000Z</published>
+    <updated>2016-08-18T13:24:55.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="宏特殊用法"><a href="#宏特殊用法" class="headerlink" title="宏特殊用法"></a>宏特殊用法</h2><h3 id="1-字符串化-Stringification"><a href="#1-字符串化-Stringification" class="headerlink" title="1. 字符串化(Stringification)"></a>1. 字符串化(Stringification)</h3><p>在宏体中，如果宏参数前加个<strong>#</strong>，那么在宏体扩展的时候，宏参数会被扩展成字符串的形式。如：</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> WARN_IF(EXP) \</span></div><div class="line">do &#123; <span class="meta-keyword">if</span> (EXP) \</div><div class="line">	fprintf (stderr, <span class="meta-string">"Warning: "</span> #EXP <span class="meta-string">"\n"</span>); &#125; \</div><div class="line">while (0)</div></pre></td></tr></table></figure>
+<p><strong>WARN_IF (x == 0);</strong>会被扩展成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">do </div><div class="line">&#123; </div><div class="line">	if (x == 0)</div><div class="line">		fprintf (stderr, &quot;Warning: &quot; &quot;x == 0&quot; &quot;\n&quot;); </div><div class="line">&#125;</div><div class="line">while (0);</div></pre></td></tr></table></figure>
+<p>这种用法可以用在assert中，如果断言失败，可以将失败的语句输出到反馈信息中</p>
+<h3 id="2-连接-Concatenation"><a href="#2-连接-Concatenation" class="headerlink" title="2. 连接(Concatenation)"></a>2. 连接(Concatenation)</h3><p>在宏体中，如果宏体所在标示符中有<strong>##</strong>，那么在宏体扩展的时候，宏参数会被直接替换到标示符中。如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#define COMMAND(NAME)  &#123; #NAME, NAME ## _command &#125;</div><div class="line">struct command</div><div class="line">&#123;</div><div class="line">    char *name;</div><div class="line">    void (*function) (void);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>在宏扩展的时候：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">struct command commands[] =</div><div class="line">&#123;</div><div class="line">    COMMAND (quit),</div><div class="line">    COMMAND (help),</div><div class="line">    ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>会被扩展成：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">struct command commands[] =</div><div class="line">&#123;</div><div class="line">    &#123; &quot;quit&quot;, quit_command &#125;,</div><div class="line">    &#123; &quot;help&quot;, help_command &#125;,</div><div class="line">    ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>这样就节省了大量时间，提高效率。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;宏特殊用法&quot;&gt;&lt;a href=&quot;#宏特殊用法&quot; class=&quot;headerlink&quot; title=&quot;宏特殊用法&quot;&gt;&lt;/a&gt;宏特殊用法&lt;/h2&gt;&lt;h3 id=&quot;1-字符串化-Stringification&quot;&gt;&lt;a href=&quot;#1-字符串化-Stringificat
+    
+    </summary>
+    
+    
+      <category term="c/c++" scheme="http://antyme.com/tags/c-c/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>git好用容易忘记的命令</title>
+    <link href="http://antyme.com/2016/08/18/git%E5%A5%BD%E7%94%A8%E5%AE%B9%E6%98%93%E5%BF%98%E8%AE%B0%E7%9A%84%E5%91%BD%E4%BB%A4/"/>
+    <id>http://antyme.com/2016/08/18/git好用容易忘记的命令/</id>
+    <published>2016-08-18T10:30:48.000Z</published>
+    <updated>2016-08-18T10:33:13.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
+<pre><code>删除本地和git跟踪：
+    git rm
+只删除git跟踪，保留本地：
+    git rm --cached 文件名
+</code></pre><p>2、移动文件</p>
+<pre><code>git mv srcName dstName
+相当于
+mv srcName dstName
+git rm srcName
+git add dstName
+</code></pre><p>3、查看日志</p>
+<pre><code>git log
+仅展示简要的增改行数统计
+git log --stat
+使用pretty选项适合自己风格的格式
+git log --pretty=oneline
+git log --pretty=short
+git log --pretty=full
+git log --pretty=fuller
+git log --pretty=format:&quot;%h - %an, %ar : %s&quot;
+
+format参数说明：
+%H 提交对象（commit）的完整哈希字符串
+%h    提交对象的简短哈希字符串
+%T    树对象（tree）的完整哈希字符串
+%t    树对象的简短哈希字符串
+%P    父对象（parent）的完整哈希字符串
+%p    父对象的简短哈希字符串
+%an    作者（author）的名字
+%ae    作者的电子邮件地址
+%ad    作者修订日期（可以用 -date= 选项定制格式）
+%ar    作者修订日期，按多久以前的方式显示
+%cn    提交者（committer）的名字
+%ce    提交者的电子邮箱地址
+%cd    提交日期
+%cr    提交日期，按多久以前的方式显示
+%s    提交说明
+
+git log常用命令选项：
+-p                按补丁格式显示每个更新之间的差异
+--stat            显示每次更新的文件修改统计信息
+--shortstat        只显示--stat中最后的行数修改添加移除统计
+--name-only        仅在提交信息后显示已修改的文件清单
+--name-status    显示新增、修改、删除的文件清单
+--abbrev-commit    仅显示SHA-1的前几个字符，而非所有的40个字符
+--relative-date    使用较短的相对时间显示（比如，“2 week ago”）
+--graph            显示ASCII图形表示的分支合并历史
+--pretty        使用其他格式显示历史提交信息。可用的选项包括oneline、short、full、fuller和format（后跟指定格式）
+-n                     仅显示最近的n条提交
+--since, --after    仅显示指定时间之后的提交
+--until, --before    仅显示指定时间之前的提交
+--author            仅显示指定作者相关的提交
+--committer            仅显示指定提交者相关的提交
+
+git log --since=2.minutes
+git log --since=2.weeks
+git log --before=&quot;2016-08-17&quot;
+git log --after=&quot;2016-08-16&quot; --before=&quot;2018-08-17&quot;
+</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;git好用容易忘记的命令&quot;&gt;&lt;a href=&quot;#git好用容易忘记的命令&quot; class=&quot;headerlink&quot; title=&quot;git好用容易忘记的命令&quot;&gt;&lt;/a&gt;&lt;strong&gt;git好用容易忘记的命令&lt;/strong&gt;&lt;/h3&gt;&lt;p&gt;1、移除文件&lt;/p&gt;
+&lt;p
+    
+    </summary>
+    
+    
+      <category term="git" scheme="http://antyme.com/tags/git/"/>
+    
+  </entry>
+  
+</feed>
