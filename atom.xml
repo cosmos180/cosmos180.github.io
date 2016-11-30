@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://antyme.com/"/>
-  <updated>2016-09-25T08:34:38.000Z</updated>
+  <updated>2016-11-30T03:49:13.000Z</updated>
   <id>http://antyme.com/</id>
   
   <author>
@@ -14,6 +14,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iOS判断当前输入法是系统自带还是第三方</title>
+    <link href="http://antyme.com/2016/11/30/iOS%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E8%BE%93%E5%85%A5%E6%B3%95%E6%98%AF%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6%E8%BF%98%E6%98%AF%E7%AC%AC%E4%B8%89%E6%96%B9/"/>
+    <id>http://antyme.com/2016/11/30/iOS判断当前输入法是系统自带还是第三方/</id>
+    <published>2016-11-30T03:30:07.000Z</published>
+    <updated>2016-11-30T03:49:13.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="http://stackoverflow.com/questions/26153336/how-do-i-find-out-the-current-keyboard-used-on-ios8" target="_blank" rel="external">参考链接</a></p>
+<p>目前iOS SDK还没有公开获取当前键盘的name，但国外大神找到了“灰色”方法可以获取到，前提是键盘处于visible活跃状态。（现在还不确定能否通过审核😅）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">NSString *currentKeyboardName = [[[[UITextInputMode activeInputModes] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@&quot;isDisplayed = YES&quot;]] lastObject] valueForKey:@&quot;extendedDisplayName&quot;];</div><div class="line">if ([currentKeyboardName isEqualToString:@&quot;简体拼音&quot;] || [currentKeyboardName isEqualToString:@&quot;表情符号&quot;] || [currentKeyboardName isEqualToString:@&quot;English (US)&quot;]) &#123;</div><div class="line">//系统自带键盘</div><div class="line">&#125; else &#123;</div><div class="line">//第三方键盘 eg:百度、搜狗、讯飞等</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;http://stackoverflow.com/questions/26153336/how-do-i-find-out-the-current-keyboard-used-on-ios8&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;
+    
+    </summary>
+    
+    
+      <category term="iOS" scheme="http://antyme.com/tags/iOS/"/>
+    
+  </entry>
   
   <entry>
     <title>OpenGL学习与理解</title>
