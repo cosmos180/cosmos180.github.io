@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://antyme.com/"/>
-  <updated>2016-11-30T03:49:13.000Z</updated>
+  <updated>2016-12-14T10:42:02.000Z</updated>
   <id>http://antyme.com/</id>
   
   <author>
@@ -14,6 +14,82 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>WebSocket协议-SocketRocket源码学习</title>
+    <link href="http://antyme.com/2016/12/14/WebSocket%E5%8D%8F%E8%AE%AE-SocketRocket%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"/>
+    <id>http://antyme.com/2016/12/14/WebSocket协议-SocketRocket源码学习/</id>
+    <published>2016-12-14T08:36:44.000Z</published>
+    <updated>2016-12-14T10:42:02.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://tools.ietf.org/html/rfc6455#section-5.5.1" target="_blank" rel="external">rfc6455 WebSockets 标准</a></p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/WebSockets/Writing_WebSocket_servers" target="_blank" rel="external">编写 WebSocket 服务器</a></p>
+<h3 id="WebSocket概述、握手"><a href="#WebSocket概述、握手" class="headerlink" title="WebSocket概述、握手"></a>WebSocket概述、握手</h3><p>首先，服务器必须通过标准 TCP 套接字来侦听外来的连接请求。取决于你的平台，可能已经处理好握手了。举个例子，我们假定你的服务监听在地址 example.com ，端口号 8000 上，而且能够回应路径 /chat 上的 GET 请求。</p>
+<blockquote>
+<p>警告: 服务器监听任意所选择的端口，但是如果在 80 或者 443 之外的端口上，可能会在防火墙或者代理上出问题。在 443 端口上比较容易成功，但是需要安全连接（TLS/SSL）。另外就是大多数浏览器（比如 Firefox 8+）不允许在安全页面上连接不安全的 WebSocket 服务器。</p>
+</blockquote>
+<p>握手这一环节就是 WebSockets 上的“web”。它是从 HTTP 到 WS 的桥梁。握手时会协商连接的详细信息，并且如果条件不适合，任何一方都可以在成功建立连接之前退出。服务器一定要清楚客户端所要求的一切信息，否则可能会发生安全问题。</p>
+<h5 id="客户端握手请求"><a href="#客户端握手请求" class="headerlink" title="客户端握手请求"></a>客户端握手请求</h5><p>即使你正在构建一个服务，WebSocket 握手请求仍需要由客户端发起。因此你必须知道如何解读客户端信息。首先客户端会发送类似这样的标准 HTTP 请求（HTTP 版本号最低为 1.1 ，而且请求方法必须为 GET）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">GET /chat HTTP/1.1</div><div class="line">Host: example.com:8000</div><div class="line">Upgrade: websocket</div><div class="line">Connection: Upgrade</div><div class="line">Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</div><div class="line">Sec-WebSocket-Version: 13</div></pre></td></tr></table></figure>
+<p>客户端可以请求扩展和/或子协议化，详见<a href="https://developer.mozilla.org/zh-CN/docs/WebSockets/Writing_WebSocket_servers#Miscellaneous" target="_blank" rel="external">杂项</a>。另外，常规的头部信息如User-Agent,Referer, Cookie, or authentication 等也可能会出现。你可以随意处理这些内容，它们并不直接属于WebScoket的一部分，忽略它们也没事。在许多的常见设置中，反向代理已经对它们进行了处理。</p>
+<p>如果存在任何未知或者错误的请求头，服务器应该发送一个 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#400" target="_blank" rel="external">“400 Bad Request”</a>并立即关闭 socket。像往常一样，也可以在HTTP响应体中给出握手失败的原因，但是这个消息可能从来都不会显示出来 (浏览器不显示)。 如果服务器无法理解请求的WebSockets的版本，它应该发送一个包含它能理解的版本号的Sec-WebSocket-Version的头部信息。 (本指南解释了最新版本的v13)。现在让我们来了解一下最让人期待的头部信息，Sec-WebSocket-Key。</p>
+<blockquote>
+<p><em>提示: 所有的浏览器都会发送 Origin 请求头，你可以用它来处理安全问题（比如黑名单，白名单，origin检查之类的）然后发送回去 403 Forbidden 来禁止连接。但是要注意，非浏览器客户端可以发送伪造的 Origin。大多数应用如果没有检测到 Origin 请求头将会拒绝请求。</em></p>
+<p><em>提示: 请求地址 (例如这里是 /chat ) 在规范中没有明确定义。所以许多人巧妙的利用这点，让一个服务器处理多个 WebSocket 应用。例如在 example.com/chat 上是一个聊天室，与此同时在 /game 上运行一个多人联机游戏。</em></p>
+<p><em>注意: 常规 HTTP 状态码 只能在握手前使用。握手成功后，你就得用不同的代码了 (参阅规范的第7章第4节 ).</em></p>
+</blockquote>
+<h5 id="服务器握手响应"><a href="#服务器握手响应" class="headerlink" title="服务器握手响应"></a>服务器握手响应</h5><p>服务器收到握手请求后，就应该发送一个看起来很怪异 (但是仍然是 HTTP ) 的响应，就像这样：(记得每一个响应头之间用 \r\n 间隔，最后再放一个 \r\n 空行)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 101 Switching Protocols</div><div class="line">Upgrade: websocket</div><div class="line">Connection: Upgrade</div><div class="line">Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</div></pre></td></tr></table></figure>
+<p>此外，服务器在这里也可以指明 扩展/子协议，具体参考 杂项。其中的 Sec-WebSocket-Accept 比较有意思。要生成它，将客户端提供的 Sec-WebSocket-Key 和规定中指明的 魔法字符串 “258EAFA5-E914-47DA-95CA-C5AB0DC85B11” 简单地连在一起，进行 SHA-1 Hash，然后用 base64 编码，返回结果即可。</p>
+<blockquote>
+<p>仅供参考: 这个过程对于判断服务器是否支持WebSockets这个很明显的事情来说可能显得太过复杂。但是，这非常重要，如果服务器接受了一个WebSockets的链接却按照HTTP请求来解析可能会带来安全上的问题。</p>
+</blockquote>
+<p>所以假设客户端发来的是 “dGhlIHNhbXBsZSBub25jZQ==”，服务器就回复 “s3pPLMBiTxaQ9kYGzzhZRbK+xOo=”。一旦服务器发送完这些响应头，连接就建立了，可以开始交换数据了。</p>
+<blockquote>
+<p>当然服务器也可以发送 Set-Cookie 之类的头，或者关于认证的请求，或者通过其他状态码重定向，总之只要在握手响应信息发出之前都可以。</p>
+</blockquote>
+<h5 id="持续追踪客户端"><a href="#持续追踪客户端" class="headerlink" title="持续追踪客户端"></a>持续追踪客户端</h5><p>这部分和Websocket协议没有直接关系，但请务必注意：你的服务器必须持续追踪每个客户端的socket以避免进行重复的握手。同一个客户IP地址可能尝试连接多次（但服务器为保护自己免受DoS拒绝服务式攻击，也可拒绝那些过多请求连接的客户端）。</p>
+<h3 id="WebSocket协议"><a href="#WebSocket协议" class="headerlink" title="WebSocket协议"></a>WebSocket协议</h3><blockquote>
+<p>我们知道客户端和服务端都能在任意时候发送数据——这是WebSocket的神奇之处，而且不管数据是从客户端-&gt;服务端，还是从服务端-&gt;客户端，每个数据帧（包）的格式都是一样的，如下表所示：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">0                   1                   2                   3</div><div class="line"> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</div><div class="line">+-+-+-+-+-------+-+-------------+-------------------------------+</div><div class="line">|F|R|R|R| opcode|M| Payload len |    Extended payload length    |</div><div class="line">|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |</div><div class="line">|N|V|V|V|       |S|             |   (if payload len==126/127)   |</div><div class="line">| |1|2|3|       |K|             |                               |</div><div class="line">+-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +</div><div class="line">|     Extended payload length continued, if payload len == 127  |</div><div class="line">+ - - - - - - - - - - - - - - - +-------------------------------+</div><div class="line">|                               |Masking-key, if MASK set to 1  |</div><div class="line">+-------------------------------+-------------------------------+</div><div class="line">| Masking-key (continued)       |          Payload Data         |</div><div class="line">+-------------------------------- - - - - - - - - - - - - - - - +</div><div class="line">:                     Payload Data continued ...                :</div><div class="line">+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +</div><div class="line">|                     Payload Data continued ...                |</div><div class="line">+---------------------------------------------------------------+</div><div class="line"></div><div class="line">							websocket协议（数据帧格式）</div></pre></td></tr></table></figure>
+<blockquote>
+<p>1、字段FIN：FIN 位和操作码字段共同起到把一个报文分成几个数据帧发送的作用。这就叫做报文分段，分段只在操作码为 0x0、0x1、0x2 时有效。下面demo-1详细介绍其用法。</p>
+<p>2、字段RSV1、RSV2、RSV3可忽略，那是用于扩展的保留字段。</p>
+<p>3、字段opcode：操作码(opcode) 字段定义怎样解释负载数据： 字段定义了如何解释有效负载数据:  0x0 为继续，0x1 文本 (以 utf-8 编码)，0x2 为二进制数据，和后面将要讨论的其他所谓”控制代码”。在此版本的 Websocket（当前版本号为13），0x3 到 0x7 和 0xB 到 0xF 无意义。<br><br></p>
+<ul>
+<li>0x00：表示这帧是连续的帧，应该把这帧的负载数据连接到接收的上一帧，下面demo1描述了具体的用法。<br><br></li>
+<li>0x01：负载数据是文本。<br><br></li>
+<li>0x02：负载数据是二进制数据。<br><br></li>
+<li>0x08：关闭连接的请求帧，要关闭一个连接的话，客户端或者服务端可以发送一个带有一段特殊控制序列数据的控制帧，来开始挥手过程。一旦接收到这样的帧，另一方发送关闭帧作为回应。任何关闭连接之后的数据将被废弃。（我在调试的时候这个值等于’\b’，知道为什么吗😝）<br><br></li>
+<li>0x9：Ping包，在握手后的任何一个时间点，客户端或者服务器可以选择发送一个ping包给对方。<br> <br></li>
+<li>0xA：Pong包，当ping包被收到时，接受者必须尽可能快的发回pong包。例如，你可以使用这个机制来确定客户端仍然处于连接状态。</li>
+</ul>
+<p>4、字段MASK：MASK字段表明报文是否被编码（按：即前述XOR异或加密）。客户端发来的消息应该被掩蔽，所以你的服务器应该期待这个位为1。（事实上，<a href="https://tools.ietf.org/html/rfc6455#section-5.1节" target="_blank" rel="external">rfc6455 websocket规范的5.1</a>说如客户端发来“未掩蔽”的报文那服务端应该断开这个连接。）服务端回报文给客户端则不要掩蔽数据，相应的MASK位为0。稍后我们将解释掩蔽。注意：即使在一个安全套接字上传输数据，也要遵守上述规则。</p>
+<p>5、字段Payload len（9-15位）：读取负载数据，需要知道读到那里为止。因此获知负载数据长度很重要。这个过程稍微有点复杂，要以下这些步骤：</p>
+<ul>
+<li>读取9-15位 (包括9和15位本身)，并转换为无符号整数。如果值小于或等于125，这个值就是长度；如果是 126，请转到步骤 2。如果它是 127，请转到步骤 3。</li>
+<li>读取接下来的 16 位并转换为无符号整数，并作为长度。</li>
+<li>读取接下来的 64 位并转换为无符号整数 (最高有效位必须为0)，并作为长度。</li>
+</ul>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Client: FIN=1, opcode=0x1, msg=&quot;hello&quot;</div><div class="line">Server: (process complete message immediately) Hi.</div><div class="line">Client: FIN=0, opcode=0x1, msg=&quot;and a&quot;</div><div class="line">Server: (listening, new message containing text started)</div><div class="line">Client: FIN=0, opcode=0x0, msg=&quot;happy new&quot;</div><div class="line">Server: (listening, payload concatenated to previous message)</div><div class="line">Client: FIN=1, opcode=0x0, msg=&quot;year!&quot;</div><div class="line">Server: (process complete message) Happy new year to you too!</div><div class="line"></div><div class="line">								demo-1</div></pre></td></tr></table></figure>
+<p>demo-1描述服务器如何回应客户端发送的文本数据。第一个报文发送了单个数据帧，而第二个报文通过三帧发送。 只展示的客户端的 FIN 位和操作码。</p>
+<h3 id="WebSocket-iOS开源库源码学习（facebook）"><a href="#WebSocket-iOS开源库源码学习（facebook）" class="headerlink" title="WebSocket iOS开源库源码学习（facebook）"></a>WebSocket iOS开源库源码学习（<a href="https://github.com/facebook/SocketRocket" target="_blank" rel="external">facebook</a>）</h3><pre><code>正在组织语言中...敬请期待
+</code></pre><hr>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;https://tools.ietf.org/html/rfc6455#section-5.5.1&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;rfc6455 WebSockets 标准&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http
+    
+    </summary>
+    
+    
+      <category term="iOS/WebSocket/SocketRocket源码" scheme="http://antyme.com/tags/iOS-WebSocket-SocketRocket%E6%BA%90%E7%A0%81/"/>
+    
+  </entry>
   
   <entry>
     <title>iOS判断当前输入法是系统自带还是第三方</title>
