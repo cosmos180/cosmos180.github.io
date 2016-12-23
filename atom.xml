@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://antyme.com/"/>
-  <updated>2016-12-15T09:23:53.000Z</updated>
+  <updated>2016-12-23T09:17:40.000Z</updated>
   <id>http://antyme.com/</id>
   
   <author>
@@ -14,6 +14,64 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>常用数据结构、排序算法算法的时间复杂度</title>
+    <link href="http://antyme.com/2016/12/23/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E3%80%81%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E7%AE%97%E6%B3%95%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/"/>
+    <id>http://antyme.com/2016/12/23/常用数据结构、排序算法算法的时间复杂度/</id>
+    <published>2016-12-23T08:58:53.000Z</published>
+    <updated>2016-12-23T09:17:40.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="http://blog.csdn.net/xiangzhihong8/article/details/51547835" target="_blank" rel="external">阅读原文</a></p>
+<p>这篇是原样抄过来的，为了自己在使用的过程中可以随时查看并迅速做出选择，希望原作者可以原谅哦！如果需要深入代码学习不同的数据结构和算法，还是点击原文回去看吧，原文有每个数据结构、算法对应的详解链接。</p>
+<p>在我们实际开发过程中，遇到比较多的场景并不是需要自己造这些轮子（算法或者数据结构），更多的是需要自己根据实际业务场景(内存占用限制，速度要求)做出选择，例如根据查找、插入、删除和遍历等不同的使用频率选择不同的数据结构。</p>
+<h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><p><img src="http://oi7r83q55.bkt.clouddn.com/QQ20161223-2.png" alt=""></p>
+<h4 id="排序算法"><a href="#排序算法" class="headerlink" title="排序算法"></a>排序算法</h4><p><img src="http://oi7r83q55.bkt.clouddn.com/QQ20161223-1.png" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;http://blog.csdn.net/xiangzhihong8/article/details/51547835&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;阅读原文&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这篇是原样抄过来的，为了自己在使用的过程
+    
+    </summary>
+    
+    
+      <category term="算法/iOS/c/c++" scheme="http://antyme.com/tags/%E7%AE%97%E6%B3%95-iOS-c-c/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>iOS Blocks的实现原理</title>
+    <link href="http://antyme.com/2016/12/18/iOS-Blocks%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"/>
+    <id>http://antyme.com/2016/12/18/iOS-Blocks的实现原理/</id>
+    <published>2016-12-18T07:56:04.000Z</published>
+    <updated>2016-12-23T09:19:03.000Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="Block的实质"><a href="#Block的实质" class="headerlink" title="Block的实质"></a>Block的实质</h4><p>Blocks.m文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">int main() &#123;</div><div class="line">    void (^blk)() = ^&#123;</div><div class="line">//        printf(&quot;Hello Blocks&quot;);</div><div class="line">        int i = 0;</div><div class="line">        i = i + 1;</div><div class="line">    &#125;;</div><div class="line">    blk();</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在命令行执行：</p>
+<blockquote>
+<p>clang -rewrite-objc Blocks.m</p>
+</blockquote>
+<p>通过clang(LLVM编译器)将含有Block语法的源代码（Blocks.m）转换为c++的源代码（Blocks.cpp）。</p>
+<p>Blocks.cpp文件（截取跟理解相关的代码）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">#ifndef BLOCK_IMPL</div><div class="line">#define BLOCK_IMPL</div><div class="line">struct __block_impl &#123;</div><div class="line">  void *isa;</div><div class="line">  int Flags;</div><div class="line">  int Reserved;</div><div class="line">  void *FuncPtr;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">struct __main_block_impl_0 &#123;</div><div class="line">  struct __block_impl impl;</div><div class="line">  struct __main_block_desc_0* Desc;</div><div class="line">  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int flags=0) &#123;</div><div class="line">    impl.isa = &amp;_NSConcreteStackBlock;</div><div class="line">    impl.Flags = flags;</div><div class="line">    impl.FuncPtr = fp;</div><div class="line">    Desc = desc;</div><div class="line">  &#125;</div><div class="line">&#125;;</div><div class="line">static void __main_block_func_0(struct __main_block_impl_0 *__cself) &#123;</div><div class="line"></div><div class="line"></div><div class="line">        int i = 0;</div><div class="line">        i = i + 1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">static struct __main_block_desc_0 &#123;</div><div class="line">  size_t reserved;</div><div class="line">  size_t Block_size;</div><div class="line">&#125; __main_block_desc_0_DATA = &#123; 0, sizeof(struct __main_block_impl_0)&#125;;</div><div class="line">int main() &#123;</div><div class="line">    void (*blk)() = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA));</div><div class="line">    ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>转换之后就是正儿八经的c语言代码了，这指针，这结构体，这带static的方法，c语言的标配啊！😁</p>
+<h4 id="Block捕获变量（局部变量、static变量、-block变量）原理"><a href="#Block捕获变量（局部变量、static变量、-block变量）原理" class="headerlink" title="Block捕获变量（局部变量、static变量、__block变量）原理"></a>Block捕获变量（局部变量、static变量、__block变量）原理</h4><p><code>未完待续</code></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;Block的实质&quot;&gt;&lt;a href=&quot;#Block的实质&quot; class=&quot;headerlink&quot; title=&quot;Block的实质&quot;&gt;&lt;/a&gt;Block的实质&lt;/h4&gt;&lt;p&gt;Blocks.m文件：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain
+    
+    </summary>
+    
+    
+      <category term="iOS/Objective-C" scheme="http://antyme.com/tags/iOS-Objective-C/"/>
+    
+  </entry>
   
   <entry>
     <title>WebSocket协议、SocketRocket源码学习</title>
