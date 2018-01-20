@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://antyme.com/"/>
-  <updated>2016-12-23T09:17:40.000Z</updated>
+  <updated>2017-04-17T03:11:20.000Z</updated>
   <id>http://antyme.com/</id>
   
   <author>
@@ -14,6 +14,188 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iOS图形对象理解</title>
+    <link href="http://antyme.com/2017/04/17/iOS%E5%9B%BE%E5%BD%A2%E5%AF%B9%E8%B1%A1%E7%90%86%E8%A7%A3/"/>
+    <id>http://antyme.com/2017/04/17/iOS图形对象理解/</id>
+    <published>2017-04-17T03:11:20.000Z</published>
+    <updated>2017-04-17T03:11:20.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Beehive源码简析</title>
+    <link href="http://antyme.com/2017/04/08/SDK%E4%B8%AD%E4%B8%80%E6%AC%A1Beehive%E5%AE%9E%E8%B7%B5/"/>
+    <id>http://antyme.com/2017/04/08/SDK中一次Beehive实践/</id>
+    <published>2017-04-07T16:00:00.000Z</published>
+    <updated>2017-04-11T12:27:37.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>参考链接：</p>
+<p><a href="https://github.com/alibaba/BeeHive" target="_blank" rel="external">alibaba/BeeHive</a></p>
+<p><a href="https://halfrost.com/beehive/" target="_blank" rel="external">BeeHive —— 一个优雅但还在完善中的解耦框架</a></p>
+<h3 id="BeeHive概述"><a href="#BeeHive概述" class="headerlink" title="BeeHive概述"></a>BeeHive概述</h3><p><img src="/images/beehive.png" alt=""></p>
+<p>BeeHive是用于iOS的App模块化编程的框架实现方案，吸收了Spring框架Service的理念来实现模块间的API耦合。</p>
+<p>目前BeeHive v1.2.0 全部是利用Protocol的方式，实现了模块间解耦的目的：</p>
+<ol>
+<li>各个模块以插件的形式存在。每个都可独立，相互解耦。 </li>
+<li>各个模块具体实现与接口调用分离 </li>
+<li>各个模块也有生命周期，也可以进行管理。</li>
+</ol>
+<h3 id="BeeHive模块注册"><a href="#BeeHive模块注册" class="headerlink" title="BeeHive模块注册"></a>BeeHive模块注册</h3><p>先从模块的注册开始分析，来看看BeeHive是如何给各个模块进行注册的。</p>
+<p>在BeeHive中是通过BHModuleManager来管理各个模块的。BHModuleManager中只会管理已经被注册过的模块。</p>
+<p>注册Module的方式总共有三种：</p>
+<h5 id="Annotation方式注册"><a href="#Annotation方式注册" class="headerlink" title="Annotation方式注册"></a>Annotation方式注册</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BeeHiveService(HomeServiceProtocol,BHViewController)</div></pre></td></tr></table></figure>
+<p>BeeHiveService宏定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">#define BeeHiveService(servicename,impl) \</div><div class="line">char * k##servicename##_service BeeHiveDATA(BeehiveServices) = &quot;&#123; \&quot;&quot;#servicename&quot;\&quot; : \&quot;&quot;#impl&quot;\&quot;&#125;&quot;;</div></pre></td></tr></table></figure>
+<p>BeeHiveDATA又是一个宏：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#define BeeHiveDATA(sectname) __attribute((used, section(&quot;__DATA,&quot;#sectname&quot; &quot;)))</div></pre></td></tr></table></figure>
+<p>最终BeeHiveService宏会在预编译结束会完全展开成下面的样子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">char * kHomeServiceProtocol_service __attribute((used, section(&quot;__DATA,&quot;&quot;BeehiveServices&quot;&quot; &quot;))) = &quot;&#123; \&quot;&quot;&quot;HomeServiceProtocol&quot;&quot;\&quot; : \&quot;&quot;&quot;BHViewController&quot;&quot;\&quot;&#125;&quot;;</div></pre></td></tr></table></figure>
+<p>到这里__attribute((used,section(“segmentname,sectionname”)))就需要先说明2个地方。</p>
+<p>__attribute第一个参数used很有用。这个关键字是用来修饰函数的。被used修饰以后，意味着即使函数没有被引用，在Release下也不会被优化。如果不加这个修饰，那么Release环境链接器下会去掉没有被引用的段。具体的描述可以看这个gun的<a href="https://gcc.gnu.org/onlinedocs/gcc-3.2/gcc/Variable-Attributes.html" target="_blank" rel="external">官方文档</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">section (&quot;section-name&quot;)</div><div class="line">Normally, the compiler places the objects it generates in sections like data and bss. Sometimes, however, you need additional sections, or you need certain particular variables to appear in special sections, for example to map to special hardware. The section attribute specifies that a variable (or function) lives in a particular section. For example, this small program uses several specific section names:</div><div class="line">          struct duart a __attribute__ ((section (&quot;DUART_A&quot;))) = &#123; 0 &#125;;</div><div class="line">          struct duart b __attribute__ ((section (&quot;DUART_B&quot;))) = &#123; 0 &#125;;</div><div class="line">          char stack[10000] __attribute__ ((section (&quot;STACK&quot;))) = &#123; 0 &#125;;</div><div class="line">          int init_data __attribute__ ((section (&quot;INITDATA&quot;))) = 0;</div><div class="line">          </div><div class="line">          main()</div><div class="line">          &#123;</div><div class="line">            /* Initialize stack pointer */</div><div class="line">            init_sp (stack + sizeof (stack));</div><div class="line">          </div><div class="line">            /* Initialize initialized data */</div><div class="line">            memcpy (&amp;init_data, &amp;data, &amp;edata - &amp;data);</div><div class="line">          </div><div class="line">            /* Turn on the serial ports */</div><div class="line">            init_duart (&amp;a);</div><div class="line">            init_duart (&amp;b);</div><div class="line">          &#125;</div><div class="line">          </div><div class="line">Use the section attribute with an initialized definition of a global variable, as shown in the example. GCC issues a warning and otherwise ignores the section attribute in uninitialized variable declarations.</div><div class="line"></div><div class="line">You may only use the section attribute with a fully initialized global definition because of the way linkers work. The linker requires each object be defined once, with the exception that uninitialized variables tentatively go in the common (or bss) section and can be multiply &quot;defined&quot;. You can force a variable to be initialized with the -fno-common flag or the nocommon attribute.</div><div class="line"></div><div class="line">Some file formats do not support arbitrary sections so the section attribute is not available on all platforms. If you need to map the entire contents of a module to a particular section, consider using the facilities of the linker instead.</div></pre></td></tr></table></figure>
+<p>Static静态变量会按照他们申明的顺序，放到一个单独的段中。我们通过使用<strong>attribute</strong>((section(“name”)))来指明哪个段。数据则用<strong>attribute</strong>((used))来标记，防止链接器会优化删除未被使用的段。</p>
+<p>再来具体说说section的作用。</p>
+<p>编译器编译源代码后生成的文件叫目标文件，从文件结构上来说，它已经是编译后可执行的文件格式，只是还没有经过链接的过程。可执行文件(Executable)主要是Windows下的PE(Portable Executable)和Linux的ELF(Executable Linkable Format)，它们也都是COFF(Common file format)格式的变种。程序源程序代码被编译之后会主要分成两个段：程序指令和程序数据。代码段属于程序指令，数据段和.bss段属于数据段。</p>
+<p>可执行文件结构图：</p>
+<p><img src="/images/elf.png" alt=""></p>
+<p>Module被这样存到了特殊的段中，那怎么取出来的呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">static NSArray&lt;NSString *&gt;* BHReadConfiguration(char *section)  </div><div class="line">&#123;</div><div class="line">    NSMutableArray *configs = [NSMutableArray array];</div><div class="line"></div><div class="line">    Dl_info info;</div><div class="line">    dladdr(BHReadConfiguration, &amp;info);</div><div class="line"></div><div class="line">#ifndef __LP64__</div><div class="line">    // const struct mach_header *mhp = _dyld_get_image_header(0); // both works as below line</div><div class="line">    const struct mach_header *mhp = (struct mach_header*)info.dli_fbase;</div><div class="line">    unsigned long size = 0;</div><div class="line">    // 找到之前存储的数据段(Module找BeehiveMods段 和 Service找BeehiveServices段)的一片内存</div><div class="line">    uint32_t *memory = (uint32_t*)getsectiondata(mhp, &quot;__DATA&quot;, section, &amp; size);</div><div class="line">#else /* defined(__LP64__) */</div><div class="line">    const struct mach_header_64 *mhp = (struct mach_header_64*)info.dli_fbase;</div><div class="line">    unsigned long size = 0;</div><div class="line">    uint64_t *memory = (uint64_t*)getsectiondata(mhp, &quot;__DATA&quot;, section, &amp; size);</div><div class="line">#endif /* defined(__LP64__) */</div><div class="line"></div><div class="line">    // 把特殊段里面的数据都转换成字符串存入数组中</div><div class="line">    for(int idx = 0; idx &lt; size/sizeof(void*); ++idx)&#123;</div><div class="line">        char *string = (char*)memory[idx];</div><div class="line"></div><div class="line">        NSString *str = [NSString stringWithUTF8String:string];</div><div class="line">        if(!str)continue;</div><div class="line"></div><div class="line">        BHLog(@&quot;config = %@&quot;, str);</div><div class="line">        if(str) [configs addObject:str];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return configs;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>通过调用这个static函数BHReadConfiguration，我们就可以拿到之前注册到BeehiveMods特殊段里面的各个Module的类名，都用字符串装在数据里。</p>
+<h5 id="读取本地Pilst文件"><a href="#读取本地Pilst文件" class="headerlink" title="读取本地Pilst文件"></a>读取本地Pilst文件</h5><p>要读取本地的Plist文件之前，需要先设置好路径。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[BHContext shareInstance].moduleConfigName = @&quot;BeeHive.bundle/BeeHive&quot;;</div></pre></td></tr></table></figure></p>
+<p><img src="/images/plist.png" alt=""></p>
+<h5 id="Load方法注册"><a href="#Load方法注册" class="headerlink" title="Load方法注册"></a>Load方法注册</h5><p>最后一种注册Module的方法就是在Load方法里面注册Module的类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">+ (void)load</div><div class="line">&#123;</div><div class="line">    [BeeHive registerDynamicModule:[self class]];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)registerService:(Protocol *)service implClass:(Class)implClass</div><div class="line">&#123;</div><div class="line">    NSParameterAssert(service != nil);</div><div class="line">    NSParameterAssert(implClass != nil);</div><div class="line"></div><div class="line">    // impClass 是否遵循了 Protocol 协议</div><div class="line">    if (![implClass conformsToProtocol:service] &amp;&amp; self.enableException) &#123;</div><div class="line">        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@&quot;%@ module does not comply with %@ protocol&quot;, NSStringFromClass(implClass), NSStringFromProtocol(service)] userInfo:nil];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Protocol 协议是否已经注册过了</div><div class="line">    if ([self checkValidService:service] &amp;&amp; self.enableException) &#123;</div><div class="line">        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@&quot;%@ protocol has been registed&quot;, NSStringFromProtocol(service)] userInfo:nil];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    NSMutableDictionary *serviceInfo = [NSMutableDictionary dictionary];</div><div class="line">    [serviceInfo setObject:NSStringFromProtocol(service) forKey:kService];</div><div class="line">    [serviceInfo setObject:NSStringFromClass(implClass) forKey:kImpl];</div><div class="line"></div><div class="line">    [self.lock lock];</div><div class="line">    [self.allServices addObject:serviceInfo];</div><div class="line">    [self.lock unlock];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="BeeHive模块调用"><a href="#BeeHive模块调用" class="headerlink" title="BeeHive模块调用"></a>BeeHive模块调用</h3><p>在BeeHive中调用以下方法可以返回一个能相应Protocol的实例对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">- (id)createService:(Protocol *)proto;</div><div class="line"></div><div class="line">- (id)createService:(Protocol *)proto;</div><div class="line">&#123;</div><div class="line">    return [[BHServiceManager sharedManager] createService:proto];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (id)createService:(Protocol *)service</div><div class="line">&#123;</div><div class="line">    id implInstance = nil;</div><div class="line"></div><div class="line">    // Protocol 协议是否已经注册过了</div><div class="line">    if (![self checkValidService:service] &amp;&amp; self.enableException) &#123;</div><div class="line">        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@&quot;%@ protocol does not been registed&quot;, NSStringFromProtocol(service)] userInfo:nil];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Class implClass = [self serviceImplClass:service];</div><div class="line"></div><div class="line">    if ([[implClass class] respondsToSelector:@selector(shareInstance)])</div><div class="line">        implInstance = [[implClass class] shareInstance];</div><div class="line">    else</div><div class="line">        implInstance = [[implClass alloc] init];</div><div class="line"></div><div class="line">    if (![implInstance respondsToSelector:@selector(singleton)]) &#123;</div><div class="line">        return implInstance;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    NSString *serviceStr = NSStringFromProtocol(service);</div><div class="line"></div><div class="line">    // 是否需要缓存</div><div class="line">    if ([implInstance singleton]) &#123;</div><div class="line">        id protocol = [[BHContext shareInstance] getServiceInstanceFromServiceName:serviceStr];</div><div class="line"></div><div class="line">        if (protocol) &#123;</div><div class="line">            return protocol;</div><div class="line">        &#125; else &#123;</div><div class="line">            [[BHContext shareInstance] addServiceWithImplInstance:implInstance serviceName:serviceStr];</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125; else &#123;</div><div class="line">        [[BHContext shareInstance] addServiceWithImplInstance:implInstance serviceName:serviceStr];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return implInstance;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法也会先检查Protocol协议是否是注册过的。然后接着取出字典里面对应的Class，如果实现了shareInstance方法，那么就生成一个单例出来，如果没有，那么就随便生成一个对象出来。如果还实现了singleton，就能进一步的把implInstance和serviceStr对应的加到BHContext的servicesByName字典里面缓存起来。这样就可以随着上下文传递了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>通常会有三种形式的接口访问形式：</p>
+<ul>
+<li>基于接口的实现Service访问方式（Java spring框架实现）</li>
+<li>基于函数调用约定实现的Export Method(PHP的extension，ReactNative的扩展机制)</li>
+<li>基于跨应用实现的URL Route模式(iPhone App之间的互访)</li>
+</ul>
+<p>BeeHive目前只实现了第一种方式，后两种方式还需要继续完善。</p>
+<p>基于接口Service访问的优点是可以编译时检查发现接口的变更，从而及时修正接口问题。缺点是需要依赖接口定义的头文件，通过模块增加得越多，维护接口定义的也有一定工作量。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;参考链接：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/alibaba/BeeHive&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;alibaba/BeeHive&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://half
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>iOS SDK cocoapod实践：源码管理和二进制发布</title>
+    <link href="http://antyme.com/2017/04/07/iOS-SDK-cocoapod%E5%AE%9E%E8%B7%B5%EF%BC%9A%E6%BA%90%E7%A0%81%E7%AE%A1%E7%90%86%E5%92%8C%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%8F%91%E5%B8%83/"/>
+    <id>http://antyme.com/2017/04/07/iOS-SDK-cocoapod实践：源码管理和二进制发布/</id>
+    <published>2017-04-07T06:42:49.000Z</published>
+    <updated>2017-04-11T12:26:20.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>参考链接：</p>
+<p><a href="http://www.infoq.com/cn/articles/cocoapods-binarization" target="_blank" rel="external">CocoaPods组件平滑二进制化解决方案</a></p>
+<p><a href="http://guides.cocoapods.org/syntax/podspec.html" target="_blank" rel="external">Podspec Syntax Reference</a></p>
+<p><a href="http://guides.cocoapods.org/syntax/podfile.html" target="_blank" rel="external">Podfile Syntax Reference</a></p>
+<p><a href="https://objccn.io/issue-6-4/" target="_blank" rel="external">深入理解 CocoaPods</a></p>
+<h3 id="认识SDK"><a href="#认识SDK" class="headerlink" title="认识SDK"></a>认识SDK</h3><p>无论负责桌面软件、服务端、前端、app还是其他偏应用层的产品，时至今日的代码工作者们基本都有第三方SDK或者开源库（.dll .a .framework .jar .so等）的使用经历，每个人对一个第三方库好不好用，专业不专业的评判侧重点不一样，但大致可以归为如下几个方面：</p>
+<h5 id="感性："><a href="#感性：" class="headerlink" title="感性："></a>感性：</h5><ul>
+<li>文件组织方式清晰明了</li>
+<li>类名前缀和包命名或者缩写要一致</li>
+<li>代码风格一定要一致</li>
+<li>函数命名遵循共性，不要出现歧义或者违背大家的共识</li>
+<li>代码注释要规范和清楚</li>
+<li>SDK功能正确，编译无警告和错误，支持最新的特性</li>
+</ul>
+<h5 id="理性："><a href="#理性：" class="headerlink" title="理性："></a>理性：</h5><hr>
+<ul>
+<li>SDK集成成本</li>
+<li>API调用简单</li>
+<li>功能可以定制</li>
+<li>便于调试</li>
+<li>API回调参数明确</li>
+<li>API稳定</li>
+<li>参数命名一定要明确无歧义</li>
+<li>自给自足，丰衣足食</li>
+<li>SDK配置参数和接口入参分开</li>
+<li>SDK参数：拼接的字符串</li>
+<li>同一类参数，封装成model，隐藏属性，通过方法构造</li>
+<li>API功能单一，减少类似enum的入参设计</li>
+<li>用于查询的属性，绝对不能直接设置</li>
+<li>API 回调设计</li>
+</ul>
+<h5 id="发布："><a href="#发布：" class="headerlink" title="发布："></a>发布：</h5><ul>
+<li>SDK打包形式</li>
+<li>发布渠道</li>
+<li>文档</li>
+<li>demo</li>
+<li>接入帮助</li>
+</ul>
+<h5 id="Cocoapods："><a href="#Cocoapods：" class="headerlink" title="Cocoapods："></a>Cocoapods：</h5><p>上面这些点基本上可以衡量出一个SDK提供方走不走心，专不专业。作为iOS从业者，cocoapods这东西应该是无人不知无人不晓的（假如你真不知道，去搞Android吧），ObjC中国一篇深入理解cocoapods的文章中对cocoapods的功能描述：</p>
+<blockquote>
+<p>CocoaPods 是开发 OS X 和 iOS 应用程序的一个第三方库的依赖管理工具。利用 CocoaPods，可以定义自己的依赖关系 (称作 pods)，并且随着时间的变化，以及在整个开发环境中对第三方库的版本管理非常方便。</p>
+<p>CocoaPods 背后的理念主要体现在两个方面。首先，在工程中引入第三方代码会涉及到许多内容。针对 Objective-C 初级开发者来说，工程文件的配置会让人很沮丧。在配置 build phases 和 linker flags 过程中，会引起许多人为因素的错误。CocoaPods 简化了这一切，它能够自动配置编译选项。</p>
+<p>其次，通过 CocoaPods，可以很方便的查找到新的第三方库。当然，这并不是说你可以简单的将别人提供的库拿来拼凑成一个应用程序。它的真正作用是让你能够找到真正好用的库，以此来缩短我们的开发周期和提升软件的质量。</p>
+</blockquote>
+<p>根据常识，只要第三方库的开发者按照cocoapods指定的规范（<code>截止写这篇文章的时候，cocoapods官网显示有3万多个第三方库且有190多万的app引用了cocoapods中的这些库，App Store平台上的应用总数量是300万左右</code>）设计代码库，就可以提交至cocoapods仓库，供全球开发者们使用。但我们平时开发过程中使用的第三方库基本上都是开源库，大致原理就是<code>pod install</code>之后就是把第三方库的源码下载到本地，然后编译成一个framework，app链接这个framework来使用。</p>
+<p>而我们是一家提供SDK的高科技公司！老板说我们最多只能把二进制放出去（老板，连二进制都不让放出去，你放我出去吧……），源码绝不能放出去！说实话还在试用期的我顿时陷入了懵逼状态，怎么办啊？要不直接放自己出去吧。。。</p>
+<p>问题总是要解决的。于是上网搜索，平时各种方案细节细到让人感动的简书、知乎还有stackflow上尽然没找到……😢。InfoQ上找到了参考链接列出的那篇为了提升编译速度对第三方pod二进制化的文章。</p>
+<h3 id="实现SDK"><a href="#实现SDK" class="headerlink" title="实现SDK"></a>实现SDK</h3><p>看完至仔细一想，我的二进制也是一堆源码编译完的，只不过是提前编译而已啊，这时我又想起了Bugtags，一个高级功能需要付费的bug管理SDK，它的pod就是以framework方式打包的。别人可以，我们没理由不行啊！废话不说了，开撸！撸之前先看下游戏规则：</p>
+<blockquote>
+<h4 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h4><p>Podfile</p>
+<p>   Podfile 是一个文件，用于定义项目所需要使用的第三方库。该文件支持高度定制，你可以根据个人喜好对其做出定制。更多相关信息，请查阅 Podfile 指南。</p>
+<p>Podspec</p>
+<p>.podspec 也是一个文件，该文件描述了一个库是怎样被添加到工程中的。它支持的功能有：列出源文件、<code>framework、编译选项和某个库所需要的依赖</code>等。</p>
+</blockquote>
+<p>这是<a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">guides.cocoapods</a>官网.podspec模板：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">Pod::Spec.new do |spec|</div><div class="line">  spec.name         = &apos;Reachability&apos;</div><div class="line">  spec.version      = &apos;3.1.0&apos;</div><div class="line">  spec.license      = &#123; :type =&gt; &apos;BSD&apos; &#125;</div><div class="line">  spec.homepage     = &apos;https://github.com/tonymillion/Reachability&apos;</div><div class="line">  spec.authors      = &#123; &apos;Tony Million&apos; =&gt; &apos;tonymillion@gmail.com&apos; &#125;</div><div class="line">  spec.summary      = &apos;ARC and GCD Compatible Reachability Class for iOS and OS X.&apos;</div><div class="line">  spec.source       = &#123; :git =&gt; &apos;https://github.com/tonymillion/Reachability.git&apos;, :tag =&gt; &apos;v3.1.0&apos; &#125;</div><div class="line">  spec.module_name  = &apos;Rich&apos;</div><div class="line"></div><div class="line">  spec.ios.deployment_target  = &apos;9.0&apos;</div><div class="line">  spec.osx.deployment_target  = &apos;10.10&apos;</div><div class="line"></div><div class="line">  spec.source_files       = &apos;Reachability/common/*.swift&apos;</div><div class="line">  spec.ios.source_files   = &apos;Reachability/ios/*.swift&apos;, &apos;Reachability/extensions/*.swift&apos;</div><div class="line">  spec.osx.source_files   = &apos;Reachability/osx/*.swift&apos;</div><div class="line"></div><div class="line">  spec.framework      = &apos;SystemConfiguration&apos;</div><div class="line">  spec.ios.framework  = &apos;UIKit&apos;</div><div class="line">  spec.osx.framework  = &apos;AppKit&apos;</div><div class="line"></div><div class="line">  spec.dependency &apos;SomeOtherPod&apos;</div><div class="line">end</div></pre></td></tr></table></figure>
+<p>前面说的Bugtag的Bugtags.podspec文件如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">Pod::Spec.new do |s|</div><div class="line">  s.name         = &quot;Bugtags&quot;</div><div class="line">  s.version      = &quot;2.2.2&quot;</div><div class="line">  s.summary      = &quot;Bug reporting for mobile apps, improve your app anytime, anywhere. Learn more at http://bugtags.com.&quot;</div><div class="line">  s.homepage     = &quot;http://bugtags.com/&quot;</div><div class="line">  s.license      = &#123;</div><div class="line">      :type =&gt; &apos;Commercial&apos;,</div><div class="line">      :text =&gt; &lt;&lt;-LICENSE</div><div class="line">                Copyright (C) 2017 Bugtags.</div><div class="line">                Permission is hereby granted to use this framework as is, modification are not allowed.</div><div class="line">                All rights reserved.</div><div class="line">        </div><div class="line">        THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</div><div class="line">        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</div><div class="line">        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</div><div class="line">        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</div><div class="line">        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</div><div class="line">        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</div><div class="line">        THE SOFTWARE.</div><div class="line">      LICENSE</div><div class="line">    &#125;</div><div class="line">  s.author              = &#123; &quot;Bugtags&quot; =&gt; &quot;dev@bugtags.com&quot; &#125;</div><div class="line">  s.platform            = :ios, &apos;6.0&apos;</div><div class="line">  s.source              = &#123; :git =&gt; &quot;https://github.com/bugtags/Bugtags-iOS.git&quot;, :tag =&gt; s.version.to_s &#125;</div><div class="line">  s.default_subspec     = &apos;Core&apos;</div><div class="line"></div><div class="line">  s.subspec &apos;Core&apos; do |ss|</div><div class="line">    ss.source_files        = &apos;Bugtags.framework/Versions/A/Headers/*.&#123;h&#125;&apos;</div><div class="line">    ss.resources           = &apos;Bugtags.bundle&apos;</div><div class="line">    ss.preserve_paths      = &apos;Bugtags.framework/*&apos;, &apos;Bugtags.bundle&apos;</div><div class="line">    ss.frameworks          = &apos;UIKit&apos;, &apos;ImageIO&apos;, &apos;AVFoundation&apos;, &apos;SystemConfiguration&apos;, &apos;CoreLocation&apos;, &apos;Security&apos;, &apos;CFNetwork&apos;, &apos;Bugtags&apos;</div><div class="line">    ss.libraries           = &apos;c++&apos;</div><div class="line">    ss.xcconfig            = &#123; &apos;FRAMEWORK_SEARCH_PATHS&apos; =&gt; &apos;&quot;$(PODS_ROOT)/Bugtags/&quot;&apos;, &apos;OTHER_LDFLAGS&apos; =&gt; &apos;-ObjC&apos; &#125;</div><div class="line">    ss.requires_arc        = true</div><div class="line">  end</div><div class="line"></div><div class="line">  s.subspec &apos;BugtagsInsta&apos; do |ss|</div><div class="line">    ss.dependency &apos;Bugtags/Core&apos;</div><div class="line">    ss.dependency &apos;BugtagsInsta&apos;</div><div class="line">  end</div><div class="line">end</div></pre></td></tr></table></figure>
+<p>看完Bugtags.podspec之后，搞过c、c++或者类似Qt的人应该有一种似曾相识的感觉：这不就是一个makefile嘛，可以指定参与编译的源文件，编译选项和链接选项以及最终二进制文件支持的平台这些定制化的配置，这些配置会在<code>pod install</code>的时候全部写入到xcode的工程文件*.xcodeproj中。<code>坦白的说，我没有把podspec文件支持的所有参数都体验一遍，但在实现公司SDK pod化的过程中，所有的配置全部可以满足，例如-force_load这种一般pod很少用的链接选项。</code></p>
+<p>按照上述模板或者上<a href="http://guides.cocoapods.org/syntax/podspec.html#subspec" target="_blank" rel="external">官网</a>和google基本可以实现运行在创建pod的时候默认生成的demo。但是这样还是没有满足发布二进制的需求啊！是的，上面所讲的是我们在开发过程中使用的podspec，这个是要放到内部源码管理工具中的，平时开发都是基于这个文件配置xcode环境的，所以是要共享的。那说好的发布二进制怎么办呢？</p>
+<p>下面是一张app使用pod的依赖图（点击看大图）：</p>
+<figure class="half"><br>    <a href="/images/pod.jpg"><img src="/images/pod.jpg" width="400" height="400"></a><br></figure>
+
+<p>其实都到这个时候了，只要把开发过程中生成的product.framework发布出去就可以了。具体是怎么样的呢？先说下我们（正常人）平时的开发和发布流程，大致是这样的，其他人我不清楚：产品经理或者老板提要求（需求：实现一个无人驾驶飞机，下周一发布，不可以被打下来），我们（代码工作者）实现（一个怎么打都打不下来的无人驾驶飞机），开发完成发给老板（老板要验收，结果老板打了一个通宵都没打下来），老板说我们的飞机可以发布了，我们做了发布前的检查和验证（擦擦飞机上的液体，抚平机翼上的皱褶），发射。</p>
+<p>大致流程说完了，开发完成，准备发布了（好开心）！我喜欢简单粗暴的方式（天生愚钝还没有想出更好的）：我准备了两份podfile：Podfile_dev和Podfile_product，两份podspecs：TupuTech.podspec_dev和TupuTech.podspec_product，具体怎么用呢？思路如下：</p>
+<blockquote>
+<p>开发的时候用Podfile_dev和TupuTech.podspec_dev，demo通过相对路径依赖本地开发pod，编译demo。在这个过程中我们的pod会编译成product.framework，这个framework就是我们需要发布的二进制SDK。<br>发布的时候用Podfile_product和TupuTech.podspec_product，修改podspec文件依赖源代码改成成依赖framework</p>
+</blockquote>
+<p>Podfile_dev文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">正在加载...</div></pre></td></tr></table></figure>
+<p>TupuTech.podspec_dev文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">正在加载...</div></pre></td></tr></table></figure>
+<p>Podfile_product文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">正在加载...</div></pre></td></tr></table></figure>
+<p>TupuTech.podspec_product文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">正在加载...</div></pre></td></tr></table></figure>
+<p>上面这些文件样子是什么样大致知道了，但是这些文件是什么时候相互替换的？怎么替换的？像这种繁琐易错的步骤最好给它脚本化，用脚本来做事最好的，shell、Python这些干这些真的太方便了，脚本化之后在准备开发或者发布的时候在代码根目录下执行这些脚本，自动帮你把这些环境配置好。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">#/bin/bash</div><div class="line"></div><div class="line">buildType=$1</div><div class="line">buildVersion=$2</div><div class="line"></div><div class="line">#更新podspec版本号</div><div class="line">if [ &quot;$buildType&quot; = &quot;product&quot; ]; then</div><div class="line">	echo &quot;product....&quot;</div><div class="line"></div><div class="line">	if [ ! $buildVersion ]; then</div><div class="line">	 echo &quot;请输入需要发布的版本号(eg:./build/build.sh product 1.5.0)&quot;</div><div class="line">	 exit</div><div class="line">	fi</div><div class="line"></div><div class="line">	#将版本号更新至对应的podspec和podfile文件中</div><div class="line">	python ./build/podspec.py ./build/podspecs/TupuTech.podspec_dev $buildVersion</div><div class="line">	python ./build/podspec.py ./build/podspecs/TupuTech.podspec_product $buildVersion</div><div class="line"></div><div class="line">	# python ./build/podfile.py ./build/podfiles/Podfile_dev $buildVersion</div><div class="line">	python ./build/podfile.py ./build/podfiles/Podfile_product $buildVersion</div><div class="line"></div><div class="line">	#依赖配置</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">	#copy dev podfile、podspec至工程目录</div><div class="line">	cp build/podfiles/Podfile_dev tupu-iOS-demo/Podfile</div><div class="line">	cp build/podspecs/TupuTech.podspec_dev podspec/TupuTech.podspec</div><div class="line">	</div><div class="line">	#使用xcode命令行编译工具编译demo，顺便生成我们需要发布的framework至指定目录./Product</div><div class="line">	xcodebuild -workspace TuputechSDKDemo.xcworkspace -scheme TuputechSDKDemo -configuration Release -sdk iphonesimulator10.3  -derivedDataPath ./Product</div><div class="line">	xcodebuild -workspace TuputechSDKDemo.xcworkspace -scheme TuputechSDKDemo -configuration Release -sdk iphoneos10.3 -derivedDataPath ./Product</div><div class="line"> 	</div><div class="line">	cp -R Product/Build/Products/Release-iphoneos/TupuTech/TupuTech.framework Product</div><div class="line"></div><div class="line">	#合并真机指令集和模拟器指令集framework</div><div class="line">	lipo -output Product/TupuTech.framework/TupuTech -create Product/Build/Products/Release-iphoneos/TupuTech/TupuTech.framework/TupuTech Product/Build/Products/Release-iphonesimulator/TupuTech/TupuTech.framework/TupuTech</div><div class="line">	</div><div class="line">	#拷贝至发布前验证目录</div><div class="line">	mkdir -p ../podspec/TupuTech/InnerFrameworks</div><div class="line">	cp -R Product/TupuTech.framework ../podspec/TupuTech/InnerFrameworks/</div><div class="line"></div><div class="line">	#使用Product环境和新framework，编译demo验证framework</div><div class="line"> 	cd ../</div><div class="line"> 	cp build/podspecs/TupuTech.podspec_product podspec/TupuTech.podspec</div><div class="line"></div><div class="line">	echo &quot;Success: product....&quot;</div><div class="line">else	</div><div class="line">	echo &quot;dev....&quot;</div><div class="line">fi</div></pre></td></tr></table></figure>
+<p>至此，podspec/TupuTech/InnerFrameworks/TupuTech.framework和podspec/TupuTech.podspec就是我们需要发布的内容。</p>
+<p>SDK是可以发布了，代码又是怎么跟踪管理的呢？我们知道TupuTech.podspec文件是要提交至Cocoapods，demo、TupuTech.framewor需要提交至类似github这种公开的代码仓库中供用户下载的，源码需要放在公司内部代码服务器上。好乱有木有？<br>接下来我会再分享一下怎么解决上面这么乱的代码跟踪以及一个阿里巴巴开源的叫做BeeHive的库是如何在我们SDK中发挥其意义的。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;参考链接：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.infoq.com/cn/articles/cocoapods-binarization&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CocoaPods组件平滑二进制化解决方案&lt;/a&gt;&lt;/
+    
+    </summary>
+    
+    
+      <category term="iOS 组件化" scheme="http://antyme.com/tags/iOS-%E7%BB%84%E4%BB%B6%E5%8C%96/"/>
+    
+  </entry>
   
   <entry>
     <title>常用数据结构、排序算法算法的时间复杂度</title>
@@ -265,7 +447,7 @@
     <link href="http://antyme.com/2016/08/18/git%E5%A5%BD%E7%94%A8%E5%AE%B9%E6%98%93%E5%BF%98%E8%AE%B0%E7%9A%84%E5%91%BD%E4%BB%A4/"/>
     <id>http://antyme.com/2016/08/18/git好用容易忘记的命令/</id>
     <published>2016-08-18T10:30:48.000Z</published>
-    <updated>2016-08-18T10:33:13.000Z</updated>
+    <updated>2018-01-20T03:41:52.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
 <pre><code>删除本地和git跟踪：
@@ -326,6 +508,24 @@ git log --since=2.minutes
 git log --since=2.weeks
 git log --before=&quot;2016-08-17&quot;
 git log --after=&quot;2016-08-16&quot; --before=&quot;2018-08-17&quot;
+</code></pre><p>4、子模块（submodule）</p>
+<pre><code>添加新的子模块
+git submodule add https://github.com/chaconinc/DbConnector
+
+存了项目 URL 与已经拉取的本地目录之间的映射
+cat .gitmodules
+
+克隆含有子模块的项目
+git clone --recursive https://github.com/chaconinc/MainProject
+
+如果你不想在子目录中手动抓取与合并，那么还有种更容易的方式。 运行命令
+git submodule update --recursive --remote Git将会进入子模块然后抓取并更新。
+
+git submodule deinit asubmodule
+
+git rm --cached asubmodule
+
+rm -rf .git/modules/asubmodule
 </code></pre>]]></content>
     
     <summary type="html">
