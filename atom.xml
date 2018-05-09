@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://antyme.com/"/>
-  <updated>2017-04-17T03:11:20.000Z</updated>
+  <updated>2018-05-09T05:46:32.932Z</updated>
   <id>http://antyme.com/</id>
   
   <author>
@@ -14,6 +14,140 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>android编译libwebp源码</title>
+    <link href="http://antyme.com/2018/05/08/android%E7%BC%96%E8%AF%91libwebp%E6%BA%90%E7%A0%81/"/>
+    <id>http://antyme.com/2018/05/08/android编译libwebp源码/</id>
+    <published>2018-05-08T02:47:55.000Z</published>
+    <updated>2018-05-09T05:46:32.932Z</updated>
+    
+    <content type="html"><![CDATA[<p>现在的Android版本都支持Webp，如果要不是JNI层需要直接调用Encode、Decode等API，根本没必要自己编译。现在公司项目需要在c++层调用Encode生成Webp，所以就自己编译，方便后续的更新和管理。其实Webp源码里面对不同OS的构建编译支持的已经很完善了，例如iOS，直接执行shell就可以生成Framework，编译Android需要一点点额外工作需要做，记录下这几个步骤，方便后续健忘的自己或者其他有需要的人可以快速编译。</p>
+<p>1、下载源码（git、http）<br>2、在源码根目录下新建 <code>Application.mk</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"># --------------------------------------------------------------------------------------</div><div class="line"># Building Options</div><div class="line"># --------------------------------------------------------------------------------------</div><div class="line"># Application Config</div><div class="line">APP_BUILD_SCRIPT := Android.mk</div><div class="line">APP_STL := gnustl_static</div><div class="line">APP_CPPFLAGS := -D__ANDROID__ -frtti -fexceptions -std=c++11</div><div class="line">APP_ABI :=armeabi-v7a arm64-v8a</div><div class="line">#APP_ABI :=arm64-v8a</div><div class="line">#NDK_TOOLCHAIN_VERSION:=4.9</div><div class="line"></div><div class="line"># Do not to assign &apos;debug&apos; here, it may cause crash</div><div class="line">APP_OPTIM := release</div></pre></td></tr></table></figure>
+<p>3、如果需要编译动态库，修改webp源码自带的Android.mk文件，在文件刚开始一点的地方定义变量：<code>ENABLE_SHARED :=1</code>，例如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">LOCAL_PATH := $(call my-dir)</div><div class="line"></div><div class="line">WEBP_CFLAGS := -Wall -DANDROID -DHAVE_MALLOC_H -DHAVE_PTHREAD -DWEBP_USE_THREAD</div><div class="line">WEBP_CFLAGS += -fvisibility=hidden</div><div class="line"></div><div class="line">ENABLE_SHARED :=1</div><div class="line">..................................................</div><div class="line">.........................</div><div class="line">.........................</div><div class="line">.........................</div></pre></td></tr></table></figure></p>
+<p>4、命令行执行 <code>ndk-build NDK_PROJECT_PATH=. NDK_APPLICATION_MK=Application.mk</code> 即可生成需要的so文件和一些可执行文件。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;现在的Android版本都支持Webp，如果要不是JNI层需要直接调用Encode、Decode等API，根本没必要自己编译。现在公司项目需要在c++层调用Encode生成Webp，所以就自己编译，方便后续的更新和管理。其实Webp源码里面对不同OS的构建编译支持的
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>arm 指令</title>
+    <link href="http://antyme.com/2018/04/02/arm-%E6%8C%87%E4%BB%A4/"/>
+    <id>http://antyme.com/2018/04/02/arm-指令/</id>
+    <published>2018-04-02T07:52:25.000Z</published>
+    <updated>2018-04-04T06:57:01.790Z</updated>
+    
+    <content type="html"><![CDATA[<p>ASR、LSL、LSR、ROR 和 RRX<br>算术右移、逻辑左移、逻辑右移、向右循环移和带扩展向右循环移。</p>
+<p>语法<br>op{S}{cond} Rd, Rm, Rs<br>op{S}{cond} Rd, Rm, #sh<br>RRX{S}{cond} Rd, Rm<br>其中：</p>
+<p>op<br>是 ASR、LSL、LSR 或 ROR 之一。</p>
+<p>S<br>是一个可选的后缀。 如果指定 S，则会更新运算结果的条件代码标记（请参阅条件执行）。</p>
+<p>Rd<br>是目标寄存器。</p>
+<p>Rm<br>是存放第一个操作数的寄存器。 此操作数将会被右移。</p>
+<p>Rs<br>是存放移位值的寄存器，所存放的移位值应用于 Rm 中的值。 只使用最低有效字节。</p>
+<p>sh<br>为一个常数移位值。 该值的允许范围由具体指令决定：</p>
+<p>ASR<br>允许移动 1-32 位</p>
+<p>LSL<br>允许移动 0-31 位</p>
+<p>LSR<br>允许移动 1-32 位</p>
+<p>ROR<br>允许移动 1-31 位</p>
+<p>用法<br>ASR 提供除以 2 的幂后的寄存器内容的有符号值。 它可将符号位复制到左侧空出的位中。</p>
+<p>LSL 提供乘以 2 的幂后的寄存器内容的值。LSR 提供除以 2 的可变次幂后的寄存器内容的无符号值。 这两个指令均会向空出的位中插入零。</p>
+<p>ROR 可提供按某个值循环移位后的寄存器内容的值。 从右端移出的位将会被插入到左侧空出的位中。</p>
+<p>RRX 可提供经右移一位后的寄存器中的值。 原先的进位标记将会移入位 [31]。 如果有 S 后缀，则将原先的位 [0] 存入进位标记中。</p>
+<p>限制<br>使用 Rs 的 ARM 指令不得使用 r15。 Thumb 指令不得使用 r15 或 r13。</p>
+<p>条件标记<br>如果指定了 S，则这些指令将会根据结果来更新 N 和 Z 标记。</p>
+<p>如果移位值为 0，则不会影响 C 标记。否则，C 标记会更新为移出的最后一位。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;ASR、LSL、LSR、ROR 和 RRX&lt;br&gt;算术右移、逻辑左移、逻辑右移、向右循环移和带扩展向右循环移。&lt;/p&gt;
+&lt;p&gt;语法&lt;br&gt;op{S}{cond} Rd, Rm, Rs&lt;br&gt;op{S}{cond} Rd, Rm, #sh&lt;br&gt;RRX{S}{cond} Rd
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>理解红黑树原理</title>
+    <link href="http://antyme.com/2018/02/27/%E7%90%86%E8%A7%A3%E7%BA%A2%E9%BB%91%E6%A0%91%E5%8E%9F%E7%90%86/"/>
+    <id>http://antyme.com/2018/02/27/理解红黑树原理/</id>
+    <published>2018-02-27T09:31:51.000Z</published>
+    <updated>2018-02-27T11:00:09.525Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://mp.weixin.qq.com/s/jz1ajDUygZ7sXLQFHyfjWA" target="_blank" rel="external">参考链接</a><br>先回顾下二叉查找树</p>
+<ul>
+<li>左子树上所有结点的值均小于或等于它的根结点的值。</li>
+<li>右子树上所有结点的值均大于或等于它的根结点的值。</li>
+<li>左、右子树也分别为二叉排序树。</li>
+</ul>
+<hr>
+<ul>
+<li>节点是红色或黑色。</li>
+<li>根节点是黑色。</li>
+<li>每个叶子节点都是黑色的空节点（NIL节点）。</li>
+<li>每个红色节点的两个子节点都是黑色。(从每个叶子到根的所有路径上不能有两个连续的红色节点)</li>
+<li>从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。<br>&lt;!– - [ ] Eat</li>
+</ul>
+<ul>
+<li>[x] Code<ul>
+<li>[x] HTML</li>
+<li>[x] CSS</li>
+<li>[x] JavaScript</li>
+</ul>
+</li>
+<li>[ ] Sleep –&gt;</li>
+</ul>
+<hr>
+<h1 id="lt-–-Hello"><a href="#lt-–-Hello" class="headerlink" title="&lt;!– Hello"></a>&lt;!– Hello</h1><p>I like <a href="https://www.google.com/" target="_blank" rel="external">Google</a> –&gt;</p>
+<p>下图中这棵树，就是一颗典型的二叉查找树：<br><img src="/images/BST.webp" alt=""></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="keyword">int</span> idx = <span class="number">0</span>; idx &lt; size/<span class="keyword">sizeof</span>(<span class="keyword">void</span>*); ++idx)&#123;</div><div class="line">    <span class="keyword">char</span> *<span class="built_in">string</span> = (<span class="keyword">char</span>*)memory[idx];</div><div class="line"></div><div class="line">    NSString *str = [NSString stringWithUTF8String:<span class="built_in">string</span>];</div><div class="line">    <span class="keyword">if</span>(!str)<span class="keyword">continue</span>;</div><div class="line"></div><div class="line">    BHLog(@<span class="string">"config = %@"</span>, str);</div><div class="line">    <span class="keyword">if</span>(str) [configs addObject:str];</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;https://mp.weixin.qq.com/s/jz1ajDUygZ7sXLQFHyfjWA&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;参考链接&lt;/a&gt;&lt;br&gt;先回顾下二叉查找树&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;左子树上所有结点的值均
+    
+    </summary>
+    
+    
+      <category term="算法" scheme="http://antyme.com/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Mac命令行终端下使用shadowsocks翻墙</title>
+    <link href="http://antyme.com/2018/01/20/Mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%BB%88%E7%AB%AF%E4%B8%8B%E4%BD%BF%E7%94%A8shadowsocks%E7%BF%BB%E5%A2%99/"/>
+    <id>http://antyme.com/2018/01/20/Mac命令行终端下使用shadowsocks翻墙/</id>
+    <published>2018-01-20T09:53:08.000Z</published>
+    <updated>2018-01-20T10:37:15.627Z</updated>
+    
+    <content type="html"><![CDATA[<p>很舒服！😝！</p>
+<p><a href="http://www.cashqian.net/blog/001486989831982332565298e4942a2bb8f56b08f9d2475000" target="_blank" rel="external">Mac命令行终端下使用shadowsocks翻墙
+</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;很舒服！😝！&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.cashqian.net/blog/001486989831982332565298e4942a2bb8f56b08f9d2475000&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;M
+    
+    </summary>
+    
+    
+      <category term="工具" scheme="http://antyme.com/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
   
   <entry>
     <title>iOS图形对象理解</title>
@@ -447,7 +581,7 @@
     <link href="http://antyme.com/2016/08/18/git%E5%A5%BD%E7%94%A8%E5%AE%B9%E6%98%93%E5%BF%98%E8%AE%B0%E7%9A%84%E5%91%BD%E4%BB%A4/"/>
     <id>http://antyme.com/2016/08/18/git好用容易忘记的命令/</id>
     <published>2016-08-18T10:30:48.000Z</published>
-    <updated>2018-01-20T03:41:52.000Z</updated>
+    <updated>2018-01-20T09:15:04.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
 <pre><code>删除本地和git跟踪：
@@ -526,6 +660,9 @@ git submodule deinit asubmodule
 git rm --cached asubmodule
 
 rm -rf .git/modules/asubmodule
+</code></pre><p>5、开启socks5代理</p>
+<pre><code>git config --global http.proxy &apos;socks5://127.0.0.1:1080&apos; 
+git config --global https.proxy &apos;socks5://127.0.0.1:1080&apos;
 </code></pre>]]></content>
     
     <summary type="html">

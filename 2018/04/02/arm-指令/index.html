@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> arm 指令 · bug world</title><meta name="description" content="arm 指令 - bug小英雄"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://antyme.com/atom.xml" title="bug world"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/logo.jpeg" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/cosmos180" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">arm 指令</h1><div class="post-info">2018年4月2日</div><div class="post-content"><p>ASR、LSL、LSR、ROR 和 RRX<br>算术右移、逻辑左移、逻辑右移、向右循环移和带扩展向右循环移。</p>
+<p>语法<br>op{S}{cond} Rd, Rm, Rs<br>op{S}{cond} Rd, Rm, #sh<br>RRX{S}{cond} Rd, Rm<br>其中：</p>
+<p>op<br>是 ASR、LSL、LSR 或 ROR 之一。</p>
+<p>S<br>是一个可选的后缀。 如果指定 S，则会更新运算结果的条件代码标记（请参阅条件执行）。</p>
+<p>Rd<br>是目标寄存器。</p>
+<p>Rm<br>是存放第一个操作数的寄存器。 此操作数将会被右移。</p>
+<p>Rs<br>是存放移位值的寄存器，所存放的移位值应用于 Rm 中的值。 只使用最低有效字节。</p>
+<p>sh<br>为一个常数移位值。 该值的允许范围由具体指令决定：</p>
+<p>ASR<br>允许移动 1-32 位</p>
+<p>LSL<br>允许移动 0-31 位</p>
+<p>LSR<br>允许移动 1-32 位</p>
+<p>ROR<br>允许移动 1-31 位</p>
+<p>用法<br>ASR 提供除以 2 的幂后的寄存器内容的有符号值。 它可将符号位复制到左侧空出的位中。</p>
+<p>LSL 提供乘以 2 的幂后的寄存器内容的值。LSR 提供除以 2 的可变次幂后的寄存器内容的无符号值。 这两个指令均会向空出的位中插入零。</p>
+<p>ROR 可提供按某个值循环移位后的寄存器内容的值。 从右端移出的位将会被插入到左侧空出的位中。</p>
+<p>RRX 可提供经右移一位后的寄存器中的值。 原先的进位标记将会移入位 [31]。 如果有 S 后缀，则将原先的位 [0] 存入进位标记中。</p>
+<p>限制<br>使用 Rs 的 ARM 指令不得使用 r15。 Thumb 指令不得使用 r15 或 r13。</p>
+<p>条件标记<br>如果指定了 S，则这些指令将会根据结果来更新 N 和 Z 标记。</p>
+<p>如果移位值为 0，则不会影响 C 标记。否则，C 标记会更新为移出的最后一位。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+</div></article></div></main><footer><div class="paginator"><a href="/2018/02/27/理解红黑树原理/" class="prev">PREV</a><a href="/2018/05/08/android编译libwebp源码/" class="next">NEXT</a></div><div class="copyright"><p>© 2012 - 2018 <a href="http://antyme.com">bug小英雄</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>

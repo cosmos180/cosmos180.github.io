@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 理解红黑树原理 · bug world</title><meta name="description" content="理解红黑树原理 - bug小英雄"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://antyme.com/atom.xml" title="bug world"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/logo.jpeg" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/cosmos180" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">理解红黑树原理</h1><div class="post-info">2018年2月27日</div><div class="post-content"><p><a href="https://mp.weixin.qq.com/s/jz1ajDUygZ7sXLQFHyfjWA" target="_blank" rel="external">参考链接</a><br>先回顾下二叉查找树</p>
+<ul>
+<li>左子树上所有结点的值均小于或等于它的根结点的值。</li>
+<li>右子树上所有结点的值均大于或等于它的根结点的值。</li>
+<li>左、右子树也分别为二叉排序树。</li>
+</ul>
+<hr>
+<ul>
+<li>节点是红色或黑色。</li>
+<li>根节点是黑色。</li>
+<li>每个叶子节点都是黑色的空节点（NIL节点）。</li>
+<li>每个红色节点的两个子节点都是黑色。(从每个叶子到根的所有路径上不能有两个连续的红色节点)</li>
+<li>从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。<br>&lt;!– - [ ] Eat</li>
+</ul>
+<ul>
+<li>[x] Code<ul>
+<li>[x] HTML</li>
+<li>[x] CSS</li>
+<li>[x] JavaScript</li>
+</ul>
+</li>
+<li>[ ] Sleep –&gt;</li>
+</ul>
+<hr>
+<h1 id="lt-–-Hello"><a href="#lt-–-Hello" class="headerlink" title="&lt;!– Hello"></a>&lt;!– Hello</h1><p>I like <a href="https://www.google.com/" target="_blank" rel="external">Google</a> –&gt;</p>
+<p>下图中这棵树，就是一颗典型的二叉查找树：<br><img src="/images/BST.webp" alt=""></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="keyword">int</span> idx = <span class="number">0</span>; idx &lt; size/<span class="keyword">sizeof</span>(<span class="keyword">void</span>*); ++idx)&#123;</div><div class="line">    <span class="keyword">char</span> *<span class="built_in">string</span> = (<span class="keyword">char</span>*)memory[idx];</div><div class="line"></div><div class="line">    NSString *str = [NSString stringWithUTF8String:<span class="built_in">string</span>];</div><div class="line">    <span class="keyword">if</span>(!str)<span class="keyword">continue</span>;</div><div class="line"></div><div class="line">    BHLog(@<span class="string">"config = %@"</span>, str);</div><div class="line">    <span class="keyword">if</span>(str) [configs addObject:str];</div><div class="line">&#125;</div></pre></td></tr></table></figure></div></article></div></main><footer><div class="paginator"><a href="/2018/01/20/Mac命令行终端下使用shadowsocks翻墙/" class="prev">PREV</a><a href="/2018/04/02/arm-指令/" class="next">NEXT</a></div><div class="copyright"><p>© 2012 - 2018 <a href="http://antyme.com">bug小英雄</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>

@@ -2,9 +2,44 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://antyme.com/about/index.html</loc>
+    
+    <lastmod>2018-05-09T05:54:27.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://antyme.com/2018/05/08/android%E7%BC%96%E8%AF%91libwebp%E6%BA%90%E7%A0%81/</loc>
+    
+    <lastmod>2018-05-09T05:46:32.932Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://antyme.com/2018/04/02/arm-%E6%8C%87%E4%BB%A4/</loc>
+    
+    <lastmod>2018-04-04T06:57:01.790Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://antyme.com/2018/02/27/%E7%90%86%E8%A7%A3%E7%BA%A2%E9%BB%91%E6%A0%91%E5%8E%9F%E7%90%86/</loc>
+    
+    <lastmod>2018-02-27T11:00:09.525Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://antyme.com/2018/01/20/Mac%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%BB%88%E7%AB%AF%E4%B8%8B%E4%BD%BF%E7%94%A8shadowsocks%E7%BF%BB%E5%A2%99/</loc>
+    
+    <lastmod>2018-01-20T10:37:15.627Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://antyme.com/2016/08/18/git%E5%A5%BD%E7%94%A8%E5%AE%B9%E6%98%93%E5%BF%98%E8%AE%B0%E7%9A%84%E5%91%BD%E4%BB%A4/</loc>
     
-    <lastmod>2018-01-20T03:41:52.000Z</lastmod>
+    <lastmod>2018-01-20T09:15:04.000Z</lastmod>
     
   </url>
   

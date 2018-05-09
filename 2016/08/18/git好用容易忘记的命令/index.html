@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> git好用容易忘记的命令 · bug world</title><meta name="description" content="git好用容易忘记的命令 - bug小英雄"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://antyme.com/atom.xml" title="bug world"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/logo.jpeg" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/cosmos180" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">git好用容易忘记的命令</h1><div class="post-info">2016年8月18日</div><div class="post-content"><h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> git好用容易忘记的命令 · bug world</title><meta name="description" content="git好用容易忘记的命令 - bug小英雄"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://antyme.com/atom.xml" title="bug world"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/logo.jpeg" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/cosmos180" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">git好用容易忘记的命令</h1><div class="post-info">2016年8月18日</div><div class="post-content"><h3 id="git好用容易忘记的命令"><a href="#git好用容易忘记的命令" class="headerlink" title="git好用容易忘记的命令"></a><strong>git好用容易忘记的命令</strong></h3><p>1、移除文件</p>
 <pre><code>删除本地和git跟踪：
     git rm
 只删除git跟踪，保留本地：
@@ -75,14 +75,7 @@ git submodule deinit asubmodule
 git rm --cached asubmodule
 
 rm -rf .git/modules/asubmodule
-</code></pre></div></article></div></main><footer><div class="paginator"><a href="/2016/08/18/C语言宏的特殊用法和几个坑/" class="next">NEXT</a></div><div data-thread-key="2016/08/18/git好用容易忘记的命令/" data-title="git好用容易忘记的命令" data-url="http://antyme.com/2016/08/18/git好用容易忘记的命令/" data-author-key="1" class="ds-thread"></div><script>var duoshuoQuery = {short_name:"antyme"};
-(function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0] 
-     || document.getElementsByTagName('body')[0]).appendChild(ds);
-})();
-
-</script><div class="copyright"><p>© 2012 - 2018 <a href="http://antyme.com">bug小英雄</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>
+</code></pre><p>5、开启socks5代理</p>
+<pre><code>git config --global http.proxy &apos;socks5://127.0.0.1:1080&apos; 
+git config --global https.proxy &apos;socks5://127.0.0.1:1080&apos;
+</code></pre></div></article></div></main><footer><div class="paginator"><a href="/2016/08/18/C语言宏的特殊用法和几个坑/" class="next">NEXT</a></div><div class="copyright"><p>© 2012 - 2018 <a href="http://antyme.com">bug小英雄</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>
